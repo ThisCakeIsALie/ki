@@ -1,6 +1,6 @@
-<div style="text-align: center; width: 40%; margin: auto">
-<img src="./plant.png"></img>
-</div>
+ <p align="center"> 
+    <img src="./plant.png" alt="logo">
+ </p>
 
 # 木 (Ki)
 
