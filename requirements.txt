@@ -1,0 +1,5 @@
+Flask==1.1.2
+pronouncing==0.2.0
+pykakasi==1.2
+python-Levenshtein==0.12.0
+rich==1.2.3
