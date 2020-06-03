@@ -1,6 +1,6 @@
-***
-![Icon](/plant.png)
-***
+<div style="text-align: center; width: 40%; margin: auto">
+<img src="./plant.png"></img>
+</div>
 
 # 木 (Ki)
 
@@ -22,14 +22,16 @@
 
 ## Installation
 
-Ki is built using Python (backend with flask and core algorithm) and JS (frontend with Vuejs)
+Ki is built using Python (backend with flask and core algorithm) and JS (frontend with Vuejs). The online version should be a breeze to use but if you want something local, there is also a small python interface you can run yourself.
+
+You can find the online version here (COMING SOON)
 
 ### Clone
 
 - Clone this repo to your local machine using `git clone https://github.com/ThisCakeIsALie/ki.git`
 ### Setup
 
-> Install all necessary packages
+> Install all necessary packages from pip.
 
 ```shell
 $ cd ki
@@ -42,7 +44,7 @@ $ pip install .
 $ python main.py 私
 ```
 
-![Gif showcase](http://g.recordit.co/m5LATjYW7A.gif)
+![Gif showcase](/usage.gif)
 
 ---
 
