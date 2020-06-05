@@ -1,7 +1,7 @@
 import util
 import english
 from japanese import to_roman_syllables, to_pronounciation
-from english import syntactically_similar_word, phonetically_similar_word, phonetic_prefix
+from english import syntactically_similar_word, phonetically_similar_word
 from dataclasses import dataclass
 from typing import List
 from functools import lru_cache
