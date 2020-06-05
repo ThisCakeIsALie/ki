@@ -3,3 +3,4 @@ pronouncing==0.2.0
 pykakasi==1.2
 python-Levenshtein==0.12.0
 rich==1.2.3
+DAWG==0.8.0
