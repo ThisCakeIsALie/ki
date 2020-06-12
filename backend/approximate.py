@@ -61,14 +61,133 @@ def word_approximations_syntactical(word: str) -> List[WordApproximation]:
     return list(approximations)
 
 
+def extend_solution(solution, word, cost, used_percentage, matched_percentage):
+        new_cost = cost
+        new_words = [word] + solution.words
+        new_used_percentages = [used_percentage] + \
+            solution.word_used_percentages
+        new_matched_percentages = [
+            matched_percentage] + solution.word_matched_percentages
+
+        new_solution = WordApproximation(
+            new_words, new_used_percentages, new_matched_percentages, new_cost)
+
+        return new_solution
+
 @lru_cache
-def generate_approximations_phonetical(phonemes: str, full_phone_len, alpha, optimal) -> List[WordApproximation]:
+def generate_best_approximation(syllables, approximate_prefix, alpha):
+    if len(syllables) == 0:
+        return WordApproximation([], [], [], 0)
+
+    prefix_suffix_pairs = util.prefix_suffix_pairs(syllables)
+
+    solutions = []
+    for prefix, suffix in prefix_suffix_pairs:
+        if len(prefix) == 0:
+            continue
+
+        prefix_approx = approximate_prefix(prefix)
+
+        if prefix_approx is None:
+            continue
+
+        (word, prefix_cost, used_percentage, matched_percentage) = prefix_approx
+
+        rest_solution = generate_best_approximation(suffix, approximate_prefix, alpha)
+
+        cost = rest_solution.cost + alpha * 1 + (1 - alpha) * prefix_cost
+        solution = extend_solution(rest_solution, word, cost, used_percentage, matched_percentage)
+
+        solutions.append(solution)
+
+    best_solution = min(solutions, key=lambda sol: sol.cost)
+
+    return best_solution
+
+def approximate_word_syntactical(word, alpha=0.75):
+    syllables = to_roman_syllables(word)
+    full_len = len(syllables)
+
+    def approximator(prefix):
+        candidate = ''.join(prefix)
+
+        candidate_match = syntactically_similar_word(candidate)
+        candidate_cost = util.word_distance(candidate_match, candidate)
+
+        used_percentage = 1
+        matched_percentage = len(candidate) / full_len
+
+        return candidate_match, candidate_cost, used_percentage, matched_percentage
+
+    return generate_best_approximation(tuple(syllables), approximator, alpha)
+
+def approximate_word_phonetic(word, alpha=0.75):
+    pronounciation = to_pronounciation(word)
+    phonemes = pronounciation.split(' ')
+
+    full_len = len(phonemes)
+
+    def approximator(prefix):
+        result = phonetically_similar_word(prefix)
+
+        if result is None:
+            return None
+
+        (candidate_match, candidate_cost) = result
+
+        used_percentage = len(prefix) / (len(prefix) + candidate_cost)
+        matched_percentage = len(prefix) / full_len
+
+        return candidate_match, candidate_cost, used_percentage, matched_percentage
+
+    return generate_best_approximation(tuple(phonemes), approximator, alpha)
+
+"""
+@lru_cache
+def generate_best_approximation_syntactical(syllables, full_phone_len, alpha):
+    if len(syllables) == 0:
+        return WordApproximation([], [], [], 0)
+
+    best_solutions = []
+
+    for i in range(1, len(syllables) + 1):
+        prefix = syllables[:i]
+
+        candidate_word = ''.join(prefix)
+
+        word = syntactically_similar_word(candidate_word)
+        cost = util.word_distance(word, candidate_word)
+
+        used_percentage = 1
+        matched_percentage = len(candidate_word) / full_phone_len
+
+        suffix = syllables[i:]
+        old_solution = generate_best_approximation_syntactical(
+            suffix, full_phone_len, alpha)
+
+        new_cost = old_solution.cost + alpha * 1 + (1 - alpha) * cost
+        new_words = [word] + old_solution.words
+        new_used_percentages = [used_percentage] + \
+            old_solution.word_used_percentages
+        new_matched_percentages = [
+            matched_percentage] + old_solution.word_matched_percentages
+
+        new_solution = WordApproximation(
+            new_words, new_used_percentages, new_matched_percentages, new_cost)
+
+        best_solutions.append(new_solution)
+
+
+    return min(best_solutions, key=lambda sol: sol.cost)
+
+@lru_cache
+def generate_best_approximation_phonetic(phonemes, full_phone_len, alpha):
     if len(phonemes) == 0:
-        return [WordApproximation([], [], [], 0)]
+        return WordApproximation([], [], [], 0)
 
-    matches = []
+    best_solutions = []
 
-    for i in range(len(phonemes), 0, -1):
+    for i in range(1, len(phonemes) + 1):
         prefix = phonemes[:i]
 
         result = phonetically_similar_word(prefix)
@@ -81,39 +200,32 @@ def generate_approximations_phonetical(phonemes: str, full_phone_len, alpha, opt
         matched_percentage = len(prefix) / full_phone_len
 
         suffix = phonemes[i:]
-        rest_solutions = generate_approximations_phonetical(
-            tuple(suffix), full_phone_len, alpha, optimal)
+        old_solution = generate_best_approximation_phonetic(
+            tuple(suffix), full_phone_len, alpha)
 
-        for old_solution in rest_solutions:
-            new_cost = old_solution.cost + alpha * 1 + (1 - alpha) * overshoot
-            new_words = [word] + old_solution.words
-            new_used_percentages = [used_percentage] + \
-                old_solution.word_used_percentages
-            new_matched_percentages = [
-                matched_percentage] + old_solution.word_matched_percentages
+        new_cost = old_solution.cost + alpha * 1 + (1 - alpha) * overshoot
+        new_words = [word] + old_solution.words
+        new_used_percentages = [used_percentage] + \
+            old_solution.word_used_percentages
+        new_matched_percentages = [
+            matched_percentage] + old_solution.word_matched_percentages
 
-            new_solution = WordApproximation(
-                new_words, new_used_percentages, new_matched_percentages, new_cost)
+        new_solution = WordApproximation(
+            new_words, new_used_percentages, new_matched_percentages, new_cost)
 
-            matches.append(new_solution)
+        best_solutions.append(new_solution)
 
-            if not optimal:
-                return matches
+    return min(best_solutions, key=lambda sol: sol.cost)
 
-    return matches
-
-
-def word_approximations_phonetical(word: str, alpha=0.75, optimal=True) -> List[WordApproximation]:
+def approximate_word_phonetic(word: str, alpha=0.75) -> WordApproximation:
     pronounciation = to_pronounciation(word)
     phonemes = pronounciation.split(' ')
 
-    return generate_approximations_phonetical(tuple(phonemes), len(phonemes), alpha, optimal)
+    return generate_best_approximation_phonetic(tuple(phonemes), len(phonemes), alpha)
 
 
-def approximate_word(word: str, phonetic=True, **kwargs) -> WordApproximation:
-    approximator = word_approximations_phonetical if phonetic else word_approximations_syntactical
-    approximations = approximator(word, **kwargs)
+def approximate_word_syntactical(word: str, alpha=0.75) -> WordApproximation:
+    syl = to_roman_syllables(word)
 
-    best_approx = min(approximations, key=lambda approx: approx.cost)
-
-    return best_approx
+    return generate_best_approximation_syntactical(tuple(syl), len(word), alpha)
+"""

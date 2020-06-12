@@ -1,4 +1,4 @@
-from Levenshtein import ratio
+from Levenshtein import ratio, distance
 from math import ceil, floor
 
 def partitions(lst):
@@ -14,8 +14,20 @@ def partitions(lst):
 
     return parts
 
+def prefix_suffix_pairs(lst):
+    pairs = []
+
+    for i in range(0, len(lst) + 1):
+        prefix = lst[:i]
+        suffix = lst[i:]
+
+        pairs.append((prefix, suffix))
+
+    return pairs
+
 def word_distance(word1, word2):
-    return 1 - ratio(word1, word2)
+    #return 1 - ratio(word1, word2)
+    return distance(word1, word2)
 
 def almost_floor(number):
     decimal_part = number % 1
