@@ -5,6 +5,23 @@ from functools import lru_cache
 from math import floor
 from dictionary import words, pronounciations
 
+
+"""
+An alternative here would be to use a VP Tree for more efficient NNS.
+However testing has shown that the overhead is only worth it for incredibly long queries...
+
+from vptree import VPTree
+
+word_tree = VPTree(list(words), util.word_distance)
+
+...
+
+match = word_tree.get_nearest_neighbor(text)
+
+return match[1]
+"""
+
+
 def syntactically_similar_word(text: str) -> str:
     return min(words, key=lambda w: util.word_distance(w, text))
 
@@ -25,4 +42,3 @@ def phonetically_similar_word(phonemes):
             best_overshoot = overshoot
 
     return (best_word.decode('ascii'), best_overshoot - pronounciation.count(' '))
-        
