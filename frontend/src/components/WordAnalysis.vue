@@ -2,34 +2,135 @@
     <ul class="fa-ul">
         <li><font-awesome-icon class="fa-li" icon="landmark" />
             In romanji that is...
-            <span class="centered">{{ romanji }}</span>
+            <span class="centered" v-html="romanji"></span>
         </li>
         <li><font-awesome-icon class="fa-li" icon="comment" />
             In English that sounds like...
-            <span class="centered">{{ phoneticApprox }}</span>
+            <span class="centered" v-html="phoneticApprox"></span>
         </li>
         <li><font-awesome-icon class="fa-li" icon="pen" />
             And it is written similarly to...
-            <span class="centered">{{ syntacticApprox }}</span>
+            <span class="centered" v-html="syntacticApprox"></span>
         </li>
     </ul>
 </template>
 
 <script>
 const SEPARATOR = '·';
+const COLORS = ['rgba(25, 165, 152, 1)', '#97bf9f', '#bec5ab'];
+
+const correctedFloor = (number, precision = 15) => {
+    const correctedNumber = parseFloat(number.toPrecision(precision));
+
+    return Math.floor(correctedNumber);
+};
+
+const percentageSlice = (word, start, end) => {
+    const startIdx = correctedFloor(word.length * start);
+    const endIdx = correctedFloor(word.length * end);
+
+    return word.slice(startIdx, endIdx);
+};
+
+const colorWheel = function*(colors) {
+    while (true) {
+        for (const color of colors) {
+            yield color;
+        }
+    }
+}
+
+const displaySyllables = (syllables, approx = null) => {
+    if (!approx) {
+        return syllables.join(SEPARATOR);
+    }
+
+    const wheel = colorWheel(COLORS);
+
+    const wholeWord = syllables.join('');
+
+    const matchPercentages = approx.word_matched_percentages;
+
+    let charColors = [];
+    let lastPercentage = 0;
+
+    matchPercentages.forEach(percentage => {
+        const nextPercentage = lastPercentage + percentage;
+        const coloredPart = percentageSlice(wholeWord, lastPercentage, nextPercentage);
+        const partLength = coloredPart.length;
+
+        const { value: color } = wheel.next();
+
+        const newColors = Array(partLength).fill(color);
+
+        charColors = charColors.concat(newColors);
+
+        lastPercentage = nextPercentage;
+    });
+
+    
+    const coloredSyllables = [];
+    syllables.forEach(syllable => {
+        let coloredSyllable = '';
+
+        for (const char of syllable) {
+            const nextColor = charColors.shift();
+            const coloredChar = `<span style="color: ${nextColor}">${char}</span>`
+
+            coloredSyllable += coloredChar;
+        }
+
+        coloredSyllables.push(coloredSyllable);
+    });
+
+    return coloredSyllables.join(SEPARATOR);
+};
+
+const colorApproxWord = (word, usedPercentage, color) => {
+    const used = percentageSlice(word, 0, usedPercentage);
+    const unused = percentageSlice(word, usedPercentage, 1);
+
+    const coloredResult = `
+        <span style="color: ${color};">${used}</span>${unused}
+    `;
+
+    return coloredResult;
+};
+
+const displayApprox = approx => {
+    const { words, word_used_percentages: usedPercentages } = approx;
+
+    const wheel = colorWheel(COLORS);
+
+    const coloredWords = [];
+
+    words.forEach((word, idx) => {
+        const { value: color } = wheel.next();
+
+        const coloredWord = colorApproxWord(word, usedPercentages[idx], color);
+
+        coloredWords.push(coloredWord);
+    });
+
+    return coloredWords.join(SEPARATOR);
+};
 
 export default {
     name: 'word-analysis',
     props: [ 'data' ],
     computed: {
         romanji() {
-            return this.data.syllables.join(SEPARATOR);
+            return displaySyllables(this.data.syllables, this.data.phonetic_approx);
         },
         phoneticApprox() {
-            return this.data.phonetic_approx.words.join(SEPARATOR);
+            const approx = this.data.phonetic_approx;
+
+            return displayApprox(approx);
         },
         syntacticApprox() {
-            return this.data.syntactic_approx.words.join(SEPARATOR);
+            const approx = this.data.syntactic_approx;
+
+            return displayApprox(approx);
         }
     }
 }
