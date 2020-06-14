@@ -16,11 +16,11 @@ def detect_problems(word):
     fully_pronouncable = all(map(hiragana.to_pronounciation, syllables))
 
     if not fully_pronouncable:
-        warnings.append("Some parts couldn't be pronounced and were ignored (Only Kana and Kanji are supported)!")
+        warnings.append("Some parts couldn't be pronounced and were ignored (Only Kana and Kanji are supported)")
 
     has_small_tsu = 'っ' in to_hiragana(word)
 
     if has_small_tsu:
-        warnings.append('Small っ are ignored for pronounciation!')
+        warnings.append('Small っ are ignored.')
 
     return warnings
