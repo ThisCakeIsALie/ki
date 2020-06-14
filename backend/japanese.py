@@ -24,9 +24,13 @@ kakasi_romanji.setMode('s', True)
 
 romanjifier = kakasi_romanji.getConverter()
 
+def to_hiragana(word: str) -> str:
+    hiragana_word = kanji_replacer.do(word)
+
+    return hiragana_word
 
 def to_syllables(word: str) -> List[str]:
-    hiragana_word = kanji_replacer.do(word)
+    hiragana_word = to_hiragana(word)
     syllables = []
 
     for char in hiragana_word:

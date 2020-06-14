@@ -1,4 +1,5 @@
 import requests
+import validation
 from flask import Flask, render_template, jsonify, abort
 from analyse import analyse
 from dataclasses import asdict
@@ -12,15 +13,20 @@ class VueFlask(Flask):
 
 app = VueFlask(__name__, static_folder='./dist/static', template_folder='./dist')
 
+def generate_error(msg):
+    return jsonify({ 'error': msg })
 
 @app.route('/analyse_word/')
 @app.route('/analyse_word/<string:word>')
 def api(word=None):
-    if not word:
-        abort(422)
+    if not validation.is_usable(word):
+        return generate_error('Invalid input given (Either too short or too long)'), 422
+        
+    analysis_result = analyse(word)
 
-    info = analyse(word)
-    return jsonify(asdict(info))
+    info = asdict(analysis_result)
+
+    return jsonify(info)
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -29,9 +35,5 @@ def index(path):
         raise RuntimeError('While debugging use the vue frontend at port 8080')
     return render_template('index.html')
 
-
-@app.errorhandler(422)
-def internal_error(err):
-    return jsonify({ 'error': 'That is not a valid input!' })
 
 app.run(debug=True)
