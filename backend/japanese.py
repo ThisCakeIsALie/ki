@@ -70,14 +70,23 @@ def to_pronounciation(word: str) -> str:
     return ' '.join(pronounciations)
 
 
+def to_romanji(word: str) -> str:
+    return romanjifier.do(word)
+
+
 def to_roman_syllables(word: str) -> List[str]:
     syllables = to_syllables(word)
 
-    return list(map(lambda syl: romanjifier.do(syl), syllables))
+    roman_syllables = []
+    for syllable in syllables:
+        # pykakasi doesn't handle っ correctly
+        # We ignore them for now. They don't change too mucn anyway
+        syllable = syllable.replace('っ', '')
+        roman_syllable = to_romanji(syllable)
 
+        roman_syllables.append(roman_syllable)
 
-def to_romanji(word: str) -> str:
-    return romanjifier.do(word)
+    return roman_syllables
 
 
 def split_words(words: str) -> List[str]:
