@@ -1,11 +1,21 @@
 <template>
   <div id="app">
     <ki-title class="title"></ki-title>
-    <search-bar class="search-bar" @search="performAnalysis($event)"></search-bar>
-    <word-analysis class="analysis" v-if="analysisData" :data="analysisData"></word-analysis>
-    <template v-else>
-      <p>Try out a word and press enter!</p>
-    </template>
+    <div class="search-content">
+      <search-bar class="search-bar" @search="performAnalysis($event)"></search-bar>
+      <spinner class="spinner" v-if="waitingForServer" />
+      <span class="info" v-else-if="analysisError">{{ analysisError }}</span>
+      <template v-else-if="analysisData">
+        <span class="info">{{ analysisTime }}</span>
+        <span class="info" v-for="warning of analysisData.warnings" :key="warning">
+          {{ warning }}
+        </span>
+        <word-analysis class="analysis" :data="analysisData"></word-analysis>
+      </template>
+      <template v-else>
+        <p>Try out a word and press enter!</p>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -13,31 +23,60 @@
 import KiTitle from './components/KiTitle.vue';
 import SearchBar from './components/SearchBar.vue';
 import WordAnalysis from './components/WordAnalysis.vue';
+import Spinner from './components/Spinner.vue';
 
 export default {
   name: 'App',
   components: {
     KiTitle,
     SearchBar,
-    WordAnalysis
+    WordAnalysis,
+    Spinner
   },
   data() {
     return {
-      analysisData: null
+      analysisData: null,
+      waitingForServer: false,
+      analysisError: null
     };
   },
+  computed: {
+    analysisTime: function() {
+      const timeUsed = this.analysisData?.time;
+
+      const trunctuatedTime = parseFloat(timeUsed.toFixed(4));
+
+      return `Analysis took ${trunctuatedTime}s`;
+    }
+  },
   methods: {
+    startWaiting() {
+        this.waitTimeout = setTimeout(() => this.waitingForServer = true, 600);
+    },
+    stopWaiting() {
+        clearTimeout(this.waitTimeout);
+        this.waitingForServer = false;
+    },
     async performAnalysis(input) {
       try {
+        this.analysisError = null;
+        this.startWaiting();
+
         const response = await fetch(`/analyse_word/${input}`)
         const json = await response.json();
 
+        this.stopWaiting();
+
         if (json.error) {
+          this.analysisError = json.error;
           return;
         }
 
         this.analysisData = json;
+        console.log(json)
       } catch (ex) {
+        this.stopWaiting();
+        this.analysisError = 'The server could not be reached';
         console.log(ex);
       }
     }
@@ -59,20 +98,34 @@ export default {
   }
 
   .title {
-    font-size: 3vh;
+    font-size: 2em;
     margin-bottom: 2em;
-    width: 20%;
   }
 
   .search-bar {
-    font-size: 2.5vh;
+    font-size: 1.5em;
     margin-bottom: 1em;
-    width: 20%;
   }
 
   .analysis {
     font-size: 1em;
-    width: 20%;
+    margin-left: 1.75em;
+    overflow-wrap: break-word;
   }
 
+  .search-content {
+    width: min(30em, 90%);
+  }
+
+  .spinner {
+    width: 60px;
+    margin: auto;
+  }
+
+  .info {
+    display: block;
+    color: gray;
+    font-size: 0.7em;
+    text-align: center;
+  }
 </style>
