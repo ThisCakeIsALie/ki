@@ -3,7 +3,7 @@
         <img src="../assets/plant.png">
         <div>
             <span class="title-text">Ki.</span>
-            <span class="title-text small-text">Pronounciation tool.</span>
+            <span class="title-text small-text">Remember Japanese sounds easily.</span>
         </div>
     </header>
 </template>
@@ -34,6 +34,6 @@ export default {
     }
 
     .small-text {
-        font-size: 0.7em;
+        font-size: 0.35em;
     }
 </style>
