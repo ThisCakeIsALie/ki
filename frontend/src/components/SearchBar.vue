@@ -1,6 +1,6 @@
 <template>
     <div>
-        <input type="text" v-model="searchValue" @keypress.enter="submitSearch(searchValue)">
+        <input type="text" v-model="searchValue" @input="handleInput()">
         <button @click="submitSearch(searchValue)">
             <font-awesome-icon icon="search" />
         </button>
@@ -16,6 +16,15 @@ export default {
         };
     },
     methods: {
+        handleInput() {
+            if (this.timeout) {
+                clearTimeout(this.timeout);
+            }
+
+            this.timeout = setTimeout(() => {
+                this.submitSearch(this.searchValue);
+            }, 250);
+        },
         submitSearch(query) {
             this.$emit('search', query);
         }
