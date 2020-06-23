@@ -1,4 +1,3 @@
-import requests
 import validation
 from flask import Flask, render_template, jsonify, abort
 from analyse import analyse
@@ -35,5 +34,5 @@ def index(path):
         raise RuntimeError('While debugging use the vue frontend at port 8080')
     return render_template('index.html')
 
-
-app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)

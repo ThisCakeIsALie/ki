@@ -10,6 +10,9 @@ from dictionary import words, pronounciations
 An alternative here would be to use a VP Tree for more efficient NNS.
 However testing has shown that the overhead is only worth it for incredibly long queries...
 
+Also it wouldn't work at all since VP Trees require a metric distance measure, which LCS distance is not.
+(There is a metric version of it but empirically it provided bad results)
+
 from vptree import VPTree
 
 word_tree = VPTree(list(words), util.word_distance)
@@ -22,23 +25,14 @@ return match[1]
 """
 
 
-def syntactically_similar_word(text: str) -> str:
-    return min(words, key=lambda w: util.word_distance(w, text))
+def similar_word(text: str) -> str:
+    return min(words, key=lambda w: util.syntax_distance(w, text))
 
+def similar_phones(phonemes: List[str]) -> str:
+    return min(pronounciations.keys(), key=lambda p: util.phonetic_distance(p, phonemes))
 
-def phonetically_similar_word(phonemes):
-    pronounciation = ' '.join(phonemes)
-    if not pronounciations.has_keys_with_prefix(pronounciation):
+def pronounciation_to_word(phonemes):
+    if not phonemes in pronounciations:
         return None
 
-    matching_pairs = pronounciations.items(pronounciation)
-
-    best_word = None
-    best_overshoot = None
-    for phones, word in matching_pairs:
-        overshoot = phones.count(' ')
-        if best_overshoot is None or overshoot < best_overshoot:
-            best_word = word
-            best_overshoot = overshoot
-
-    return (best_word.decode('ascii'), best_overshoot - pronounciation.count(' '))
+    return pronounciations[phonemes]

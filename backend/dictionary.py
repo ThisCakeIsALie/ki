@@ -1,41 +1,30 @@
 import dawg
 import re
+import os
 import os.path
+import pronouncing
+pronouncing.init_cmu()
 
-_WORD_FILE = '5000_words.txt'
-_PRONOUNCIATION_TRIE_FILE = 'pronounciation.dawg'
+_THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+_WORD_FILE = os.path.join(_THIS_FOLDER, '5000_words.txt')
+
+_PRONOUNCIATION_TRIE_FILE = os.path.join(_THIS_FOLDER, 'pronounciation.dawg')
 
 words = None
-pronounciations = None
+pronounciations = {}
 
 with open(_WORD_FILE, encoding='utf-8') as file:
     english_words = file.read().split('\n')
     english_words = set(filter(lambda s: len(s) > 0 and not s.startswith('#'), english_words))
     words = english_words
 
-def _init_pronounciations():
-    global pronounciations
-    if os.path.exists(_PRONOUNCIATION_TRIE_FILE):
-        pronounciations = dawg.BytesDAWG().load(_PRONOUNCIATION_TRIE_FILE)
-        return
+words = frozenset(words)
 
-    word_dict = {}
+def _remove_stresses(pronounciation):
+    return re.sub(r"\d", "", pronounciation)
 
-    import pronouncing
-    pronouncing.init_cmu()
+for word, pronounciation in pronouncing.pronunciations:
+    simplified_pronounciation = _remove_stresses(pronounciation)
+    if word in words:
+        pronounciations[tuple(simplified_pronounciation.split(' '))] = word
 
-    def _remove_stresses(pronounciation):
-        return re.sub(r"\d", "", pronounciation)
-
-
-    for word, pronounciation in pronouncing.pronunciations:
-        simplified_pronounciation = _remove_stresses(pronounciation)
-        if word in words:
-            word_dict[simplified_pronounciation] = word.encode('ascii')
-        
-    word_data = list(word_dict.items())
-
-    pronounciations = dawg.BytesDAWG(word_data)
-    pronounciations.save(_PRONOUNCIATION_TRIE_FILE)
-
-_init_pronounciations()

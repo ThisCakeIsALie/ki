@@ -31,11 +31,12 @@ You can find the online version here (COMING SOON)
 - Clone this repo to your local machine using `git clone https://github.com/ThisCakeIsALie/ki.git`
 ### Setup
 
-> Install all necessary packages from pip.
+> Install all necessary packages from pip and build the C dependencies.
 
 ```shell
-$ cd ki
-$ pip install .
+$ cd ki/backend
+$ pip install -r requirements.txt
+$ python setup.py install
 ```
 
 > And start using it!

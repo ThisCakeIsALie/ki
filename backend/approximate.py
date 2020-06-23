@@ -1,7 +1,7 @@
 import util
 import english
 from japanese import to_roman_syllables, to_pronounciation
-from english import syntactically_similar_word, phonetically_similar_word
+from english import similar_word, similar_phones, pronounciation_to_word
 from dataclasses import dataclass
 from typing import List
 from functools import lru_cache
@@ -30,7 +30,7 @@ def extend_solution(solution, word, cost, used_percentage, matched_percentage):
 
         return new_solution
 
-@lru_cache
+@lru_cache(maxsize=4096)
 def generate_best_approximation(syllables, approximate_prefix, alpha):
     if len(syllables) == 0:
         return WordApproximation([], [], [], 0)
@@ -67,8 +67,8 @@ def approximate_word_syntactical(word, alpha=0.75):
     def approximator(prefix):
         candidate = ''.join(prefix)
 
-        candidate_match = syntactically_similar_word(candidate)
-        candidate_cost = util.word_distance(candidate_match, candidate)
+        candidate_match = similar_word(candidate)
+        candidate_cost = util.syntax_distance(candidate_match, candidate)
 
         used_percentage = 1
         matched_percentage = len(candidate) / full_len
@@ -84,16 +84,13 @@ def approximate_word_phonetic(word, alpha=0.75):
     full_len = len(phonemes)
 
     def approximator(prefix):
-        result = phonetically_similar_word(prefix)
+        candidate_phones = similar_phones(prefix)
+        candidate_word = pronounciation_to_word(candidate_phones)
+        candidate_cost = util.phonetic_distance(candidate_phones, prefix)
 
-        if result is None:
-            return None
-
-        (candidate_match, candidate_cost) = result
-
-        used_percentage = len(prefix) / (len(prefix) + candidate_cost)
+        used_percentage = 1
         matched_percentage = len(prefix) / full_len
 
-        return candidate_match, candidate_cost, used_percentage, matched_percentage
+        return candidate_word, candidate_cost, used_percentage, matched_percentage
 
     return generate_best_approximation(tuple(phonemes), approximator, alpha)

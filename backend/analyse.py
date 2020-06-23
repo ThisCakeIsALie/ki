@@ -31,7 +31,7 @@ def analyse(word: str) -> WordInfo:
 
     warnings = detect_problems(word) # Detect english characters etc.
 
-    phonetic_approx = approximate_word_phonetic(word, alpha=0.75)
+    phonetic_approx = approximate_word_phonetic(word, alpha=0.1)
 
     syntactic_approx = approximate_word_syntactical(word, alpha=0.5)
 

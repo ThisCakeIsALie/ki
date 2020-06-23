@@ -1,18 +1,6 @@
-from Levenshtein import ratio, distance
+from Levenshtein import distance
+from lcs import lcs_distance
 from math import ceil, floor
-
-def partitions(lst):
-    if len(lst) == 0:
-        return [[]]
-
-    parts = []
-    for i in range(1, len(lst) + 1):
-        start = lst[:i]
-        rest = lst[i:]
-        for rest_partition in partitions(rest):
-            parts.append([start] + rest_partition)
-
-    return parts
 
 def prefix_suffix_pairs(lst):
     pairs = []
@@ -25,9 +13,11 @@ def prefix_suffix_pairs(lst):
 
     return pairs
 
-def word_distance(word1, word2):
-    #return 1 - ratio(word1, word2)
+def syntax_distance(word1, word2):
     return distance(word1, word2)
+
+def phonetic_distance(phones1, phones2):
+    return lcs_distance(phones1, phones2)
 
 def almost_floor(number):
     decimal_part = number % 1
