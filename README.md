@@ -1,5 +1,5 @@
  <p align="center"> 
-    <img src="./plant.png" alt="logo">
+    <img src="./logo.png" alt="logo">
  </p>
 
 # 木 (Ki)
