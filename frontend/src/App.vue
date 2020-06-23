@@ -12,9 +12,7 @@
         </span>
         <word-analysis class="analysis" :data="analysisData"></word-analysis>
       </template>
-      <template v-else>
-        <p>Try out a word and press enter!</p>
-      </template>
+      <usage-text class="info" v-else />
     </div>
   </div>
 </template>
@@ -24,6 +22,7 @@ import KiTitle from './components/KiTitle.vue';
 import SearchBar from './components/SearchBar.vue';
 import WordAnalysis from './components/WordAnalysis.vue';
 import Spinner from './components/Spinner.vue';
+import UsageText from './components/UsageText.vue';
 
 export default {
   name: 'App',
@@ -31,7 +30,8 @@ export default {
     KiTitle,
     SearchBar,
     WordAnalysis,
-    Spinner
+    Spinner,
+    UsageText
   },
   data() {
     return {
