@@ -4,7 +4,7 @@
 void to_list(PyObject* seq_obj, char** seq, size_t size) {
     PyObject* strObj;
 
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; (size_t) i < size; ++i) {
         strObj = PyTuple_GetItem(seq_obj, i);
         seq[i] = PyUnicode_AsUTF8(strObj);
     }
@@ -38,9 +38,11 @@ int calc_lcs_distance(char** seq1, char** seq2, size_t seq1_size, size_t seq2_si
         }
     }
 
+    int result = seq1_size + seq2_size - 2 * cache[y * seq1_size + seq2_size];
+
     free(cache);
 
-    return seq1_size + seq2_size - 2 * cache[y * seq1_size + seq2_size];
+    return result;
 }
 
 static PyObject* lcs_distance(PyObject* self, PyObject* args) {
