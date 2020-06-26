@@ -1,13 +1,15 @@
 import hiragana
 from japanese import to_syllables, to_hiragana
 
-MAX_INPUT_LENGTH = 50
+MAX_INPUT_LENGTH = 20
 
 def is_usable(word):
     if not word:
         return False
 
-    return 0 < len(word) < MAX_INPUT_LENGTH
+    syllable_count = len(to_syllables(word))
+
+    return 0 < syllable_count < MAX_INPUT_LENGTH
 
 def detect_problems(word):
     warnings = []
