@@ -14,6 +14,7 @@
       </template>
       <usage-text class="info" v-else />
     </div>
+    <credit-text class="info" />
   </div>
 </template>
 
@@ -23,6 +24,7 @@ import SearchBar from './components/SearchBar.vue';
 import WordAnalysis from './components/WordAnalysis.vue';
 import Spinner from './components/Spinner.vue';
 import UsageText from './components/UsageText.vue';
+import CreditText from './components/CreditText.vue';
 
 export default {
   name: 'App',
@@ -31,7 +33,8 @@ export default {
     SearchBar,
     WordAnalysis,
     Spinner,
-    UsageText
+    UsageText,
+    CreditText
   },
   data() {
     return {
@@ -73,11 +76,10 @@ export default {
         }
 
         this.analysisData = json;
-        console.log(json)
       } catch (ex) {
         this.stopWaiting();
         this.analysisError = 'The server could not be reached';
-        console.log(ex);
+        console.error(ex);
       }
     }
   }
@@ -95,6 +97,7 @@ export default {
     align-items: center;
 
     margin-top: 20vh;
+    min-height: 78vh;
   }
 
   .title {
@@ -115,6 +118,7 @@ export default {
 
   .search-content {
     width: min(30em, 90%);
+    flex-grow: 1;
   }
 
   .spinner {
