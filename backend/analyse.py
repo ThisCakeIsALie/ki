@@ -21,7 +21,7 @@ class WordInfo:
     phonetic_approx: WordApproximation
     syntactic_approx: WordApproximation
 
-@lru_cache
+@lru_cache(maxsize=4096)
 def analyse(word: str) -> WordInfo:
     timer = Stopwatch()
     timer.start()

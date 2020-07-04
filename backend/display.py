@@ -17,14 +17,10 @@ def color_wheel():
 
 def display_approx(approx):
     words = approx.words
-    used_percentages = approx.word_used_percentages
 
     colored_words = []
-    for word, used_percentage, color in zip(words, used_percentages, color_wheel()):
-        used = util.percentage_substring(word, 0, used_percentage)
-        not_used = util.percentage_substring(word, used_percentage, 1)
-
-        colored_words.append(f'[{color}]{used}[/{color}]{not_used}')
+    for word, color in zip(words, color_wheel()):
+        colored_words.append(f'[{color}]{word}[/{color}]')
 
     return '·'.join(colored_words)
 

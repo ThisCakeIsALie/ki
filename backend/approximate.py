@@ -10,30 +10,26 @@ from functools import lru_cache
 @dataclass
 class WordApproximation:
     words: List[str]
-    # How much of the corresponding word is actually used
-    word_used_percentages: List[float]
     # How much of the original word this word approximates
     word_matched_percentages: List[float]
     cost: float  # lower is better
 
 
-def extend_solution(solution, word, cost, used_percentage, matched_percentage):
+def extend_solution(solution, word, cost, matched_percentage):
         new_cost = cost
         new_words = [word] + solution.words
-        new_used_percentages = [used_percentage] + \
-            solution.word_used_percentages
         new_matched_percentages = [
             matched_percentage] + solution.word_matched_percentages
 
         new_solution = WordApproximation(
-            new_words, new_used_percentages, new_matched_percentages, new_cost)
+            new_words, new_matched_percentages, new_cost)
 
         return new_solution
 
 @lru_cache(maxsize=4096)
 def generate_best_approximation(syllables, approximate_prefix, alpha):
     if len(syllables) == 0:
-        return WordApproximation([], [], [], 0)
+        return WordApproximation([], [], 0)
 
     prefix_suffix_pairs = util.prefix_suffix_pairs(syllables)
 
@@ -47,12 +43,12 @@ def generate_best_approximation(syllables, approximate_prefix, alpha):
         if prefix_approx is None:
             continue
 
-        (word, prefix_cost, used_percentage, matched_percentage) = prefix_approx
+        (word, prefix_cost, matched_percentage) = prefix_approx
 
         rest_solution = generate_best_approximation(suffix, approximate_prefix, alpha)
 
         cost = rest_solution.cost + alpha * 1 + (1 - alpha) * prefix_cost
-        solution = extend_solution(rest_solution, word, cost, used_percentage, matched_percentage)
+        solution = extend_solution(rest_solution, word, cost, matched_percentage)
 
         solutions.append(solution)
 
@@ -70,10 +66,9 @@ def approximate_word_syntactical(word, alpha=0.75):
         candidate_match = similar_word(candidate)
         candidate_cost = util.syntax_distance(candidate_match, candidate)
 
-        used_percentage = 1
         matched_percentage = len(candidate) / full_len
 
-        return candidate_match, candidate_cost, used_percentage, matched_percentage
+        return candidate_match, candidate_cost, matched_percentage
 
     return generate_best_approximation(tuple(syllables), approximator, alpha)
 
@@ -88,9 +83,8 @@ def approximate_word_phonetic(word, alpha=0.75):
         candidate_word = pronounciation_to_word(candidate_phones)
         candidate_cost = util.phonetic_distance(candidate_phones, prefix)
 
-        used_percentage = 1
         matched_percentage = len(prefix) / full_len
 
-        return candidate_word, candidate_cost, used_percentage, matched_percentage
+        return candidate_word, candidate_cost, matched_percentage
 
     return generate_best_approximation(tuple(phonemes), approximator, alpha)

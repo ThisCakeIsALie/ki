@@ -86,28 +86,25 @@ const displaySyllables = (syllables, approx = null) => {
     return coloredSyllables.join(SEPARATOR);
 };
 
-const colorApproxWord = (word, usedPercentage, color) => {
-    const used = percentageSlice(word, 0, usedPercentage);
-    const unused = percentageSlice(word, usedPercentage, 1);
-
+const colorApproxWord = (word, color) => {
     const coloredResult = `
-        <span style="color: ${color};">${used}</span>${unused}
+        <span style="color: ${color};">${word}</span>
     `;
 
     return coloredResult;
 };
 
 const displayApprox = approx => {
-    const { words, word_used_percentages: usedPercentages } = approx;
+    const { words } = approx;
 
     const wheel = colorWheel(COLORS);
 
     const coloredWords = [];
 
-    words.forEach((word, idx) => {
+    words.forEach(word => {
         const { value: color } = wheel.next();
 
-        const coloredWord = colorApproxWord(word, usedPercentages[idx], color);
+        const coloredWord = colorApproxWord(word, color);
 
         coloredWords.push(coloredWord);
     });
