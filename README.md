@@ -14,7 +14,7 @@
   This works by decomposing the sounds of the original japanese word into english words.
 
   Now you can easily build stories and mnemonics with these new words!
-- Check out the online version here (COMING SOON)
+- Check out the online version [here](http://thecakeisalie.pythonanywhere.com)
 - ...or keep reading to use it locally
 
 ---
@@ -24,7 +24,7 @@
 
 Ki is built using Python (backend with flask and core algorithm) and JS (frontend with Vuejs). The online version should be a breeze to use but if you want something local, there is also a small python interface you can run yourself.
 
-You can find the online version here (COMING SOON)
+You can find the online version [here](http://thecakeisalie.pythonanywhere.com)
 
 ### Clone
 
