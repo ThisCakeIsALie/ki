@@ -51,28 +51,15 @@ $ python main.py 私
 
 ## How it works
 
-- As input we get kanji and possibly hiragana or katakana
-- We translate it all into hiragana and separate it into syllables
-- Now we do two approximations. First the syntactic...
-  - We partition the syllables
-  - For each partition we find words that are syntactically similar to the romanji of the partition parts
-  - We assign a cost to each possible partition based on some simple Heuristics
-  - And pick the best partition
-- And the phonetic approximation...
-  - Once again we partition the syllables into groups
-  - Instead of finding syntactically similar words we find words whose phonetic (pronounced) prefix matches with that of the group
-  - For this, the CMU pronouncing dictionary is used
-  - We evaluate each partition based on unnecessary unused syllables and amount of words used
-  - There is also a greedy mode which uses a simple length heuristic to find a word faster at the cost of missing out on a possibly better match (This is used in the online version)
-- The online version uses a lot of caching and the greedy mode to speedup response time
+- As input we get kanji and possibly hiragana or katakana (e.g 私)
+- We translate it all into hiragana and separate them (e.g わ, た and し)
+- The idea of the approximations as english words is to group them back together into groups (e.g. one possibilty would be [わた] and [し])
+- For each group generated this way we find a word that looks like the Romanji for the group and one that sounds similar to it (e.g "data" and "water" for [わた])
+- We assign a cost to the entire approximation by judging how well the words fit the groups and by how many groups there are (more words are worse for remembering)
+- And then we do this for every possible combination of groups and pick the one with the lowest cost
+(In a smarter way than just going through all of them one by one so it is not abysmally slow)
+- The words approximations of those groups are the ones chosen as the final result!
 - If you are interested in details just check out the code! The meat of it is in `approximate.py`
-
-## FAQ
-
-- **Why are there weird words I don't know?**
-    Internally this usesthe CMU pronouncing dictionary which has over 100k words. Naturally there will sometimes be weird words. The "looks like" approximation on the other hand only uses the 10k most common english words, so the situation there might be better. Shortening the CMU is on the roadmap though!
-
----
 
 ## License
 
