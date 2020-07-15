@@ -2,8 +2,6 @@
     <img src="./logo.png" alt="logo">
  </p>
 
-# 木 (Ki)
-
 > Easily remember japanese pronounciation with english words you already know!
 
   Remembering kanji (japanese writing) is hard but sometimes pronounciation can be too.
